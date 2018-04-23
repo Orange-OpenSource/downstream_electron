@@ -19,9 +19,6 @@
     "files"
   ],
   "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
   "homepage": "https://castlabs.com/open-source/downstream/",
   "scripts": {
     "build": "webpack",
