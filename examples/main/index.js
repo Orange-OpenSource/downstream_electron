@@ -1,15 +1,42 @@
 'use strict';
 window.$ = window.jQuery = require('jquery');
 const { remote } = require('electron');
+const clpp = require("../../clpp/clpp.withstyles.min");
+const persistent = require("../../clpp/clpp_persistent.plugin");
 
 // DEV
-const downstreamElectron = require('../../api/index').init(window);
+const downstreamElectron = require('../../api/index').init(window, persistent);
 // TESTING PRODUCTION
 // const downstreamElectron = require('../../dist/index').init(window);
 
+
 const playerUrl = `file://${__dirname}/../../player/index.html`;
 
-const persistentConfig = {};
+const clppConfig = {
+  license: "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoiV2ViIiwidXJscyI6WyJjYXN0bGFicy5jb20iLCJjYXN0bGFicy1jaHJvbWVjYXN0LnMzLWV1LXdlc3QtMS5hbWF6b25hd3MuY29tIiwiY2xwcC5zMy1ldS13ZXN0LTEuYW1hem9uYXdzLmNvbSIsImxvY2FsaG9zdCIsIjEyNy4wLjAuMSJdLCJraWQiOjQ0MX0.Awa33txsCNArKMZ6cL4ESs90BNmHJ4l3rbTXNJnjgwtmqgVaoDF_C7W7nBiheuH7zBEePHoinr7f3jpld50mQ10yhLWoCFgvOu-qNCcI5jReXAsnspaHwMPONTp3STDTgPEulNOnsNBMyJnmPN0ftbSQhbvTK52yshp0NI11e15TSNAhm1bHB5kjzNAcBj98xR0nzSIAmuxvYLs9HJhlb-cNMb1wB82faD2jR6iPjQK1Jjw5MjxqnxEr5wJ9LFv0Jax0VNqwsu46-3PkMft2rrFMlLYLrl9QZNa-tQCDdFMm-9I6IUhO6jYtzkcuCnnB6NtMtfMrMpaEcaZgOpUm_g",
+  autoplay: true,
+  drmtoday: {
+    userId: 'purchase',
+    sessionId: 'p0',
+    merchant: 'six',
+    environment: clpp.statics.drmtoday.STAGING
+  }
+};
+
+const parsedConfig = clpp.parseConfig(clppConfig);
+const drm = parsedConfig.configShaka.drm;
+const drmtoday = parsedConfig.config.drmtoday;
+
+const persistentConfig = {
+  licenseUrl: drm.servers["com.widevine.alpha"],
+  serverCertificate: drm.advanced["com.widevine.alpha"].serverCertificate,
+  customData: {
+    userId: drmtoday.userId,
+    sessionId: drmtoday.sessionId,
+    merchant: drmtoday.merchant
+  }
+};
+
 
 function showStatusOK(message, contentStatus) {
   contentStatus = contentStatus || '#contentStatus';
