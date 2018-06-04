@@ -18,9 +18,9 @@
     "storage",
     "files"
   ],
-  "main": "dist/index.js",
+  "main": "api/index.js",
   "files": [
-    "dist"
+    "api"
   ],
   "homepage": "https://castlabs.com/open-source/downstream/",
   "scripts": {
