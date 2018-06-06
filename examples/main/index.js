@@ -30,7 +30,7 @@ function FakePersistentPlugin () {
 // DEV
 const downstreamElectron = require('../../api/index').init(window, new FakePersistentPlugin());
 // TESTING PRODUCTION
-// const downstreamElectron = require('../../dist/index').init(window);
+// const downstreamElectron = require('../../dist/index').init(window, new FakePersistentPlugin());
 
 const playerUrl = `file://${__dirname}/../../player/index.html`;
 
@@ -169,6 +169,15 @@ function addStartActions(manifestId) {
       showStatusOK('Create Persistent Session: ' + persistentSessionId, contentStatus);
     }, function (err) {
       showStatusError('Create Persistent Session', err, contentStatus);
+    });
+  }));
+
+  //Create Persistent Session - forced
+  $('#contentActions').append($('<input type="button" value="Create Persistent Session - forced">').on('click', function () {
+    downstreamElectron.downloads.createPersistent(manifestId, persistentConfig, true).then(function (persistentSessionId) {
+      showStatusOK('Create Persistent Session - forced: ' + persistentSessionId, contentStatus);
+    }, function (err) {
+      showStatusError('Create Persistent Session - forced', err, contentStatus);
     });
   }));
 
@@ -311,6 +320,15 @@ function addItemActions(manifestId,
       showStatusOK('Create Persistent Session: ' + persistentSessionId, contentStatus);
     }, function (err) {
       showStatusError('Create Persistent Session', err, contentStatus);
+    });
+  }));
+
+  //Create Persistent Session - forced
+  $(contentActions).append($('<input type="button" value="Create Persistent Session - forced">').on('click', function () {
+    downstreamElectron.downloads.createPersistent(manifestId, persistentConfig, true).then(function (persistentSessionId) {
+      showStatusOK('Create Persistent Session - forced: ' + persistentSessionId, contentStatus);
+    }, function (err) {
+      showStatusError('Create Persistent Session - forced', err, contentStatus);
     });
   }));
 
