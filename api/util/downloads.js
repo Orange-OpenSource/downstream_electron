@@ -76,7 +76,6 @@ downloadUtil.getDownloadLinks = function getDownloadLinks (manifestId, localPath
     for (k = 0, l = mediaUrls.length; k < l; k++) {
       mediaFile = mediaUrls[k].mediaFile;
       mediaBaseUrl = mediaUrls[k].baseURL;
-      index = k;
       mediaBaseUrl = mediaBaseUrl.replace(/\.\.\//g, "");
       mediaBaseUrl = mediaBaseUrl.replace(/\.\./g, "");
       if (mediaFile === mediaBaseUrl || remotePath === mediaBaseUrl) {
@@ -108,6 +107,7 @@ downloadUtil.getDownloadLinks = function getDownloadLinks (manifestId, localPath
       }
     }
   }
+  // sort links in order to allow playback before all links are downloaded (for ex: to switch from audio tracks)
   links.sort((a, b) => a.index - b.index);
   return links;
 };
