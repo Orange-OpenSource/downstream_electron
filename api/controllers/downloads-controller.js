@@ -373,7 +373,7 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
         if (info.manifest.text) {
           text = _.union(text, info.manifest.text);
         }
-        const downloaded = info.downloaded || [];
+        const downloaded = info.downloadedFiles || [];
         let downloadedHash = {};
         for (let i = 0, j = downloaded.length; i < j; i++) {
           downloadedHash[downloaded[i].localUrl] = downloaded[i];
@@ -383,6 +383,11 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
         const videoLinks = downloadUtil.getDownloadLinks(manifestId, localPath, remotePath, video, videoR, downloadedHash);
         const audioLinks = downloadUtil.getDownloadLinks(manifestId, localPath, remotePath, audio, audioR, downloadedHash);
         const textLinks = downloadUtil.getDownloadLinks(manifestId, localPath, remotePath, text, textR, downloadedHash);
+
+        const allvideoLinks =  downloadUtil.getAllLinks(manifestId, localPath, remotePath, video, videoR);
+        const allaudioLinks = downloadUtil.getAllLinks(manifestId, localPath, remotePath, audio, audioR);
+        const alltextLinks = downloadUtil.getAllLinks(manifestId, localPath, remotePath, text, textR);
+        const allFiles = allvideoLinks.concat(allaudioLinks, alltextLinks);
 
         //collect Links - end
 
@@ -395,7 +400,11 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
               self.storage.manifest.setItem(manifestId, "video", video);
               self.storage.manifest.setItem(manifestId, "audio", audio);
               self.storage.manifest.setItem(manifestId, "text", text);
+<<<<<<< HEAD
               self.storage.manifest.setItem(manifestId, "folder", localDownloadFolder);
+=======
+              self.storage.manifest.setItem(manifestId, "files", allFiles);
+>>>>>>> In getListWithInfo, returns download and all files of manifest
 
               self.storage.downloaded.clear(manifestId);
               self.storage.downloaded.concat(manifestId, downloaded);
