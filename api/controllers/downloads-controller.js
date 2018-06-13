@@ -400,11 +400,8 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
               self.storage.manifest.setItem(manifestId, "video", video);
               self.storage.manifest.setItem(manifestId, "audio", audio);
               self.storage.manifest.setItem(manifestId, "text", text);
-<<<<<<< HEAD
               self.storage.manifest.setItem(manifestId, "folder", localDownloadFolder);
-=======
               self.storage.manifest.setItem(manifestId, "files", allFiles);
->>>>>>> In getListWithInfo, returns download and all files of manifest
 
               self.storage.downloaded.clear(manifestId);
               self.storage.downloaded.concat(manifestId, downloaded);
