@@ -198,7 +198,8 @@ DownloadStats.prototype._generate = function (refresh) {
     speed += this._getDiff("downloadedBytes", manifestId, allStats, this._statsPrevious);
     speed = (speed * 1000) / ((now - this._statsTime) || 1  );
     allStats[manifestId].speed = speed;
-
+    allStats[manifestId].status = this._storage.status.getItem(manifestId, "status");
+    allStats[manifestId].details = this._storage.status.getItem(manifestId, "details");
     //progress for downloaded
     let leftParts = countParts(allStats[manifestId].leftI);
     let downloadedParts = countParts(allStats[manifestId].downloadedI);
@@ -231,6 +232,8 @@ DownloadStats.prototype._generate = function (refresh) {
     }
     showStats[manifestId].speed = allStats[manifestId].speed;
     showStats[manifestId].speedBytes = this._convertToBytes(allStats[manifestId].speed, 3, 2);
+    showStats[manifestId].status = allStats[manifestId].status;
+    showStats[manifestId].details = allStats[manifestId].details;
   }
   for (let key in showStats) {
     if (showStats.hasOwnProperty(key)) {

@@ -13,6 +13,7 @@ const STATUSES = require("../downloads/statuses");
 const CODES = require("../downloads/codes");
 const constants = require("../constants");
 const utilUrl = require("../util/url");
+const downloadFileUtil = require("../downloads/download-file-util");
 
 /**
  *
@@ -220,6 +221,55 @@ DownloadsController.prototype._markDownloadItem = function (download) {
 
 /**
  *
+ * @param {string} manifestId - manifest identifier
+ * @param {function} onSuccess - callback to be invoked when stop has been successfully
+ * @param {function} onFailure - callback to be invoked when stop failed
+ * @param {string} status - the status
+ * @param {string} statusDetails - adds details about status (on errors for example)
+ * @returns {void}
+ */
+DownloadsController.prototype._stopWithStatus = function (manifestId, onSuccess, onFailure, status, statusDetails) {
+  const self = this;
+  self._downloadOrderRemoveManifest(manifestId);
+  self.storage.getItem(manifestId)
+    .then(function (result) {
+    if (!result) {
+      onFailure(translation.getError(translation.e.downloads.ALREADY_STOPPED, manifestId));
+      return;
+    }
+    const itemsToStop = self.storage.downloading.getKeys(manifestId);
+    let itemToStop;
+    console.info("STOPPING", manifestId, itemsToStop.length);
+    let promises = [];
+    for (let i = 0, j = itemsToStop.length; i < j; i++) {
+      itemToStop = self.storage.downloading.getItem(manifestId, itemsToStop[i]);
+      itemToStop.events.removeListener("end", self._onDownloadEnd);
+      itemToStop.events.removeListener("error", self._onDownloadError);
+      promises.push(itemToStop.stopPromise());
+    }
+
+    self.storage.status.setItem(manifestId, "status", status);
+    if (statusDetails) {
+      self.storage.status.setItem(manifestId, "details", statusDetails);
+    }
+
+    promises.push(self.storage.sync(manifestId, [
+      self.storage.stores.DOWNLOADS.DOWNLOADED,
+      self.storage.stores.STATUS,
+    ]));
+    Promise.all(promises)
+      .then(function () {
+      self._finish(manifestId, onSuccess, onFailure);
+    }, function (err) {
+      onFailure(translation.getError(translation.e.downloads.STOPPING_FAILED, manifestId), err);
+    });
+  }, function (err) {
+    onFailure(translation.getError(translation.e.downloads.STOPPING_FAILED, manifestId), err);
+  });
+
+};
+/**
+ *
  * @param {Download} download - Download Class
  * @param {object} err - error object
  * @returns {void}
@@ -228,6 +278,14 @@ DownloadsController.prototype._markDownloadItem = function (download) {
 DownloadsController.prototype._onDownloadError = function (download, err) {
   console.error("ERROR", download.remoteUrl, err);
   this._markDownloadItem(download);
+  if (err === downloadFileUtil.errors.NO_SPACE_LEFT_ERROR) {
+    // stop downloading => cannot write
+    this._stopWithStatus(download.manifestId, () => {
+      console.info('stopped');
+    }, (failure) => {
+      console.info(failure);
+    }, STATUSES.ERROR, downloadFileUtil.errors.NO_SPACE_LEFT_ERROR);
+  }
 };
 
 /**
@@ -443,41 +501,7 @@ DownloadsController.prototype.start = function (manifestId, representations, onS
  * @returns {void}
  */
 DownloadsController.prototype.stop = function (manifestId, onSuccess, onFailure) {
-  const self = this;
-  self._downloadOrderRemoveManifest(manifestId);
-  self.storage.getItem(manifestId)
-      .then(function (result) {
-        if (!result) {
-          onFailure(translation.getError(translation.e.downloads.ALREADY_STOPPED, manifestId));
-          return;
-        }
-        const itemsToStop = self.storage.downloading.getKeys(manifestId);
-        let itemToStop;
-        console.info("STOPPING", manifestId, itemsToStop.length);
-        let promises = [];
-        for (let i = 0, j = itemsToStop.length; i < j; i++) {
-          itemToStop = self.storage.downloading.getItem(manifestId, itemsToStop[i]);
-          itemToStop.events.removeListener("end", self._onDownloadEnd);
-          itemToStop.events.removeListener("error", self._onDownloadError);
-          promises.push(itemToStop.stopPromise());
-        }
-
-        self.storage.status.setItem(manifestId, "status", STATUSES.STOPPED);
-
-        promises.push(self.storage.sync(manifestId, [
-          self.storage.stores.DOWNLOADS.DOWNLOADED,
-          self.storage.stores.STATUS,
-        ]));
-        Promise.all(promises)
-            .then(function () {
-              self._finish(manifestId, onSuccess, onFailure);
-            }, function (err) {
-              onFailure(translation.getError(translation.e.downloads.STOPPING_FAILED, manifestId), err);
-            });
-      }, function (err) {
-        onFailure(translation.getError(translation.e.downloads.STOPPING_FAILED, manifestId), err);
-      });
-
+  this._stopWithStatus(manifestId, onSuccess, onFailure, STATUSES.STOPPED)
 };
 
 /**

@@ -89,6 +89,7 @@ DownstreamElectronBE.prototype._apiMethods = function (methodName, promiseId, ar
     response.status = "ERROR";
     response.error = err || {};
     response.error.errorId = errorId;
+    response.error.details = internalError;
 
     self._send(response, target);
 
