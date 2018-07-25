@@ -1,6 +1,7 @@
 "use strict";
 const _ = require("underscore");
 const domain = require('domain');
+const DownloadFileNoHead = require("./download-file-no-head");
 const DownloadFile = require("./download-file");
 const mkdirp = require("mkdirp");
 
@@ -27,6 +28,7 @@ function Download (params, options) {
   this._options.maxDownloadChunkInternetRetry = appSettings.getSettings().MAX_INTERNET_ERRORS_DOWNLOAD_CHUNK_RETRY;
   this._options.timeout = appSettings.getSettings().times.DOWNLOAD_TIMEOUT;
   this._options.retryTimeout = appSettings.getSettings().times.RETRY_TIMEOUT;
+  this._options.useHeadRequests = appSettings.getSettings().useHeadRequests;
   this.stats = {
     available: 0,
     downloaded: 0,
@@ -167,12 +169,27 @@ Download.prototype.start = function () {
       });
     });
     d.run(function () {
-      self._dl = new DownloadFile(self.remoteUrl, self.localUrl, self._options);
+      self._dl = self.createDownloader(self.remoteUrl, self.localUrl, self._options);
       self._attachEvents();
       self._dl.start();
     });
   });
 };
+
+/**
+ * Creates file downloader
+ * @param {string} [remoteUrl] - url of fragment
+ * @param {string} [localUrl] - local url where to download fragment
+ * @param {object} [options] - some options
+ * @returns {void}
+ */
+Download.prototype.createDownloader = function (remoteUrl, localUrl, options) {
+  if ( this._options.useHeadRequests ) {
+    return new DownloadFile(remoteUrl, localUrl, options);
+  } else {
+    return new DownloadFileNoHead(remoteUrl, localUrl, options);
+  }
+}
 
 /**
  * @param {function} [resolve] - callback to be invoked when stop was successfully
