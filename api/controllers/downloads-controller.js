@@ -504,7 +504,7 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
                   .then(function () {
                     self._addDownloads(manifestId, videoLinks, audioLinks, textLinks);
                     if (self._indexOfManifest(manifestId) > appSettings.getSettings().numberOfManifestsInParallel - 1) {
-                      self.storage.status.setItem(manifestId, "status", STATUSES.WAITING);
+                      self.storage.status.setItem(manifestId, "status", STATUSES.QUEUED);
                     } else {
                       self.storage.status.setItem(manifestId, "status", STATUSES.STARTED);
                     }
@@ -682,7 +682,7 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
   manifestId = this._downloadOrderGetManifestId(nextManifestPositionInArray);
   if (nextManifestPositionInArray >= appSettings.getSettings().numberOfManifestsInParallel) {
     if (manifestId) {
-      this.storage.status.setItem(manifestId, "status", STATUSES.WAITING);
+      this.storage.status.setItem(manifestId, "status", STATUSES.QUEUED);
     }
     return;
   } else {
