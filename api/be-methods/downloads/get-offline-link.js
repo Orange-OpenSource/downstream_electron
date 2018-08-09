@@ -1,5 +1,4 @@
 "use strict";
-const STATUSES = require("../../downloads/statuses");
 const translation = require('../../translation/index');
 
 module.exports = function (api, onSuccess, onFailure, target, manifestId) {
