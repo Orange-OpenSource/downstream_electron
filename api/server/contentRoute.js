@@ -125,7 +125,7 @@ function ContentRoute (app, routeName) {
             .then(() => {
             sendFile(file)
           })
-            .catch(function () {
+          .catch(function () {
             return res.status(404).end();
           });
         }
