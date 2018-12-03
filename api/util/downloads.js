@@ -92,7 +92,11 @@ downloadUtil.getDownloadLinks = function getDownloadLinks (manifestId, localPath
       }
 
       if ((!downloadedHash[localUrl]) || (!downloadedHash[localUrl] && downloadedHash[localUrl].remoteUrl !== remoteUrl)) {
-        links.push({
+        if (!links[k]) {
+          links[k] = [];
+        }
+
+        links[k].push({
           id: id,
           bandwidth: bandwidth,
           contentType: contentType,

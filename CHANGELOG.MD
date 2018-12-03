@@ -1,3 +1,25 @@
+# 0.3.2
+ * Improve manifest download handling by checking status
+ * Fix comparison of local files issues on Windows
+ * Stop HTTP server process when application is quitting
+
+# 0.3.1
+ * Start HTTP server as a child process
+ * Improve download errors handling
+ * Make sure resume method use correct last status of download
+ * Update settings types in documentation
+ * Fix download status setting in startQueue
+
+# 0.3.0
+ * Download fragments without head functionality
+ * Improved download process 
+ * Implements seek during download
+ * Handling not enough space error
+ * Upgrade dependencies
+ * Download content to custom folder
+ * Previous license removal error handling
+ * Queued status for manifest downloads
+
 # 0.2.9
  * Optional chunked encoding configurable in app-settings
  * Fix error message concatenate in chunk files

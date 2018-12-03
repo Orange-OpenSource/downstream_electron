@@ -271,6 +271,11 @@ DownloadFile.prototype.start = function () {
     },
     downloadFileUtil.defaultOptions
   );
+  if (this._options.noCache) {
+    req_options.headers = req_options. headers || {};
+    req_options.headers['Cache-Control'] = 'no-cache';
+  }
+
   let req = net.request(req_options);
 
   req.on('response', (response) => {

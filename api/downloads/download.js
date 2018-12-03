@@ -28,7 +28,9 @@ function Download (params, options) {
   this._options.maxDownloadChunkInternetRetry = appSettings.getSettings().MAX_INTERNET_ERRORS_DOWNLOAD_CHUNK_RETRY;
   this._options.timeout = appSettings.getSettings().times.DOWNLOAD_TIMEOUT;
   this._options.retryTimeout = appSettings.getSettings().times.RETRY_TIMEOUT;
+  this._options.useChunkedEncoding = appSettings.getSettings().useChunkedEncoding;
   this._options.useHeadRequests = appSettings.getSettings().useHeadRequests;
+  this._options.noCache = appSettings.getSettings().noCache;
   this.stats = {
     available: 0,
     downloaded: 0,
