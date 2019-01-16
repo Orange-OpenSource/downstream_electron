@@ -1,6 +1,6 @@
 {
   "name": "downstream-electron",
-  "version": "0.3.2",
+  "version": "0.3.4",
   "description": "DOWNstream For Electron - an open-source plugin to use with Electron allowing encrypted MPEG-DASH and Smooth Streaming streams to be safely downloaded and stored locally on a user’s Windows or Mac computer.",
   "keywords": [
     "electron",
@@ -25,17 +25,25 @@
   "homepage": "https://castlabs.com/open-source/downstream/",
   "scripts": {
     "build": "webpack",
+    "package": "npm pack",
+    "prepack": "./bin/prepack.sh",
+    "postpack": "./bin/postpack.sh",
+    "clean": "./bin/clean.sh",
     "eslint": "./node_modules/.bin/eslint api",
     "jsdoc": "./node_modules/.bin/jsdoc api -r --readme api/README.md --configure jsdoc.conf.json -d jsdoc",
     "jsdoc_prv": "./node_modules/.bin/jsdoc api -r -p --readme api/README.md --configure jsdoc.conf.json -d jsdoc",
     "jasmine": "(npm run jasmine_test || true) && npm run jasmine_report",
     "jasmine_test": "./node_modules/jasmine-node/bin/jasmine-node units/ --junitreport --output tmp/units",
     "jasmine_report": "./node_modules/junit-viewer/bin/junit-viewer --results=tmp/units --save=tmp/units_result.html",
-    "start": "electron index.js --inspect=5858",
+    "start": "electron app.js --inspect=5858",
     "travis-build": "npm run eslint && npm run jasmine_test && npm run build && npm run jsdoc && true"
   },
   "author": "castlabs GmbH",
   "maintainers": [
+    {
+      "name": "Bartlomiej Makowski",
+      "email": "bartek.makowski@gmail.com"
+    },
     {
       "name": "Bartlomiej Obecny",
       "email": "bobecny@gmail.com"
@@ -47,7 +55,7 @@
     "babel-loader": "7.1.5",
     "babel-preset-env": "1.7.0",
     "clean-webpack-plugin": "0.1.19",
-    "electron": "git+https://github.com/castlabs/electron-releases.git#v1.8.7-vmp1010",
+    "electron": "git+https://github.com/castlabs/electron-releases#v4.0.1-wvvmp",
     "eslint": "5.3.0",
     "jasmine-node": "1.15.0",
     "jquery": "3.3.1",

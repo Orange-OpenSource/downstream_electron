@@ -1,17 +1,21 @@
 const { BrowserWindow, app } = require('electron');
+const fs = require('fs');
 
-//DEV
-const downstreamElectron = require('./api/index');
-let downstreamInstance;
 // TESTING PRODUCTION
-// const downstreamElectron = require('./dist/index');
+let index = './index';
+if (!fs.existsSync(index)) {
+  //DEV
+  index = './api/index';
+}
+let downstreamInstance;
 
+const downstreamElectron = require(index);
 const exampleFile = `file://${__dirname}/examples/main/index.html`;
-const path = require("path");
+const path = require('path');
 
 function createWindow () {
   // eslint-disable-next-line no-process-env
-  let appDir = path.dirname(process.mainModule.filename) + "/";
+  let appDir = path.dirname(process.mainModule.filename) + '/';
 
   // head request parameter test
   let useHeadRequest = true;
@@ -39,6 +43,6 @@ function onWillQuit() {
 app.on('ready', createWindow);
 app.on('will-quit', onWillQuit);
 app.on('window-all-closed', function () {
-  console.log("window-all-closed");
+  console.log('window-all-closed');
   app.quit();
 });
