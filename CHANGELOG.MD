@@ -1,3 +1,7 @@
+# 0.3.6
+ * Fix DeprecationWarning: Buffer() is deprecated due to security and usability issues
+ * Update electron
+ 
 # 0.3.5
  * Simple Widevine DRM example
  * Add a string parameter to let application give the manifest data
