@@ -69,13 +69,13 @@ function _createOrLoadMediaSession(resolve, pssh, session) {
 
   function _handleMessage(event) {
     console.log('message', event);
-
+  
     var request = event.message;
     var xmlhttp = new XMLHttpRequest();
-
+  
     xmlhttp.keySession = event.target;
     xmlhttp.open('POST', licenseUrl);
-
+  
     xmlhttp.onload = function(e) {
       var license = xmlhttp.response;
       xmlhttp.keySession.update(license).catch(function (error) {
@@ -83,7 +83,7 @@ function _createOrLoadMediaSession(resolve, pssh, session) {
       });
       resolve(xmlhttp.keySession.sessionId);
     }
-
+  
     xmlhttp.responseType = "arraybuffer";
     xmlhttp.send(request);
   }
@@ -91,7 +91,7 @@ function _createOrLoadMediaSession(resolve, pssh, session) {
   function _startSession(mediaKeys) {
     var keySession = mediaKeys.createSession('persistent-license');
     activeSession = keySession;
-
+    
     keySession.addEventListener('message', _handleMessage, false);
     keySession.addEventListener('keystatuseschange', _handleKeyStatusesChange, false);
 
@@ -132,7 +132,7 @@ function _createOrLoadMediaSession(resolve, pssh, session) {
       promise.then(
         function(createdMediaKeys) {
           console.log('createdMediaKeys', createdMediaKeys);
-
+          
           if (video.mediaKeys) {
             return video.mediaKeys;
           }
@@ -154,7 +154,7 @@ function _createOrLoadMediaSession(resolve, pssh, session) {
   );
 }
 
-function UnsafeInMemoryPersistentPlugin () {
+function FakePersistentPlugin () {
   this.createPersistentSession = function (persistentConfig) {
     console.log('create - persistent plugin', persistentConfig);
     return new Promise(function (resolve) {
@@ -187,7 +187,7 @@ if (!fs.existsSync(index)) {
   index = '../../api/index';
 }
 
-const downstreamElectron = require(index).init(window, new UnsafeInMemoryPersistentPlugin());
+const downstreamElectron = require(index).init(window, new FakePersistentPlugin());
 const playerUrl = `file://${__dirname}/../../player/index.html`;
 const persistentConfig = {};
 
@@ -236,22 +236,22 @@ function onDownloadFinish(err, info) {
   $('#mainActions').append($('<input id="offline" style="margin-right: 5px" type="button" value="Play Offline">').on('click', function () {
     videoPath = info.manifest.files[0].localUrl;
     audioPath = info.manifest.files[1].localUrl;
-
+  
     var ms = new MediaSource;
     var video = document.querySelector('#videoOffline');
-
+  
     ms.addEventListener('sourceopen', function() {
       console.log('sourceopen');
-
+    
       var videoSourceBuffer = ms.addSourceBuffer(videoType);
       videoSourceBuffer.appendBuffer(fs.readFileSync(videoPath).buffer);
-
+  
       var audioSourceBuffer = ms.addSourceBuffer(audioType);
       audioSourceBuffer.appendBuffer(fs.readFileSync(audioPath).buffer);
 
       downstreamElectron.downloads.getOfflineLink(manifestId).then(function (result) {
         console.log(result);
-
+  
         if (activeSession !== null) {
           var video = document.querySelector('#videoOffline');
           video.play();
@@ -261,7 +261,7 @@ function onDownloadFinish(err, info) {
             video.play();
           }, null, result.persistent);
         }
-
+  
       }, function (err) {
         console.log('play offline error', err);
       });
@@ -301,7 +301,7 @@ function onDownloadFinish(err, info) {
     });
   }));
 
-  $('#videoOffline').removeAttr('hidden');
+  $('#videoOffline').removeAttr('hidden'); 
 }
 
 function onSubmit(e) {

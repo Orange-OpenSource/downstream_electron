@@ -30,7 +30,7 @@ function createWindow () {
   let appDir = path.dirname(process.mainModule.filename) + '/';
   // head request parameter test
   let useHeadRequest = true;
-
+  
   // let useHeadRequest = false;
   downstreamInstance = downstreamElectron.init({
     appDir: appDir,
@@ -44,7 +44,10 @@ function createWindow () {
     resizable: true,
     webPreferences: {
       plugins: true,
-      nodeIntegration: true
+      nodeIntegration: true,
+      // NOTE: !WARNING! use with caution it allows app to download content
+      //                 from any URL
+      webSecurity: false
     }
   });
 
