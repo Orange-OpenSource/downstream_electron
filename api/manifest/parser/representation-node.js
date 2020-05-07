@@ -39,7 +39,7 @@ const RepresentationNode = (function (_super) {
       timelineItemList = segmentTimeline.getElementsByTagName('S');
     } catch (e) {}
     try {
-      segmentUrlList = this.segmentList.getElementsByTagName('SegmentURL');
+      segmentUrlList = this.segmentList && this.segmentList.getElementsByTagName('SegmentURL');
     } catch (e) {}
     this.bandwidth = (this.attributeList['bandwidth']) ? parseInt(this.attributeList['bandwidth']) : -1;
     this.segmentInformation = new SegmentInformation_1.SegmentInformation(presentationDuration, this.bandwidth, this.baseURL, representationID, this.attributeList['mimeType'], this.segmentBase, this.segmentTemplate, segmentTimeline, timelineItemList, this.segmentList, segmentUrlList);

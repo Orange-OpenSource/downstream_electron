@@ -16,7 +16,7 @@ function DownloadStats (storage) {
   this._storage = storage;
   this._stats = {};
   this._statsPrevious = {};
-  this._STATS_TIME_GENERATION = 1000;
+  this._STATS_TIME_GENERATION = 2000;
   _.bindAll(this, "_generate");
 }
 
@@ -288,6 +288,7 @@ DownloadStats.prototype._generate = function (refresh) {
     showStats[manifestId].progressByIdPercent = allStats[manifestId].progressByIdPercent;
     showStats[manifestId].downloadedBytesTotal = this._convertToBytes(downloadedBytesTotal, 1, 2, 2);
     showStats[manifestId].downloaded = allStats[manifestId].downloaded;
+    showStats[manifestId].downloading = allStats[manifestId].downloading;
     showStats[manifestId].left = allStats[manifestId].left;
     showStats[manifestId].errors = allStats[manifestId].errors;
     if (allStats[manifestId].speed < 0) {

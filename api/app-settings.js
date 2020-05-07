@@ -64,12 +64,10 @@ const electronApp = require("electron").app;
 const path = require("path");
 let settings = {
   downloadingThreadsRules: {
-    items: [
-      {max: 10, files: 5},
-      {max: 100, files: 10},
-      {max: 1000, files: 30},
-      {max: 100000, files: 50}
-    ],
+    files: {
+      start: 4,
+      max: 20
+    },
     threads: [
       {size: 10, number: 1},
       {size: 100, number: 3},

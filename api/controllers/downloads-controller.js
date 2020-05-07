@@ -34,10 +34,13 @@ function DownloadsController (manifestController, offlineController) {
   this._names = {
     downloadInProgress: "downloadInProgress",
     options: "options",
-    maxDownloadInProgress: "maxDownloadInProgress"
+    minDownloadInProgress: "minDownloadInProgress",
+    maxDownloadInProgress: "maxDownloadInProgress",
+    maxSpeed: "maxSpeed"
   };
   this._STATS_TIME_GENERATION = 1000;
   this.downloadStats = new DownloadStats(this.storage);
+  this.canIncreaseDownload = true;
   _.bindAll(this, "_onDownloadEnd", "_onDownloadError", "isDownloadFinished");
 }
 
@@ -334,19 +337,15 @@ DownloadsController.prototype._prepareStartOptions = function (manifestId, video
   console.info("ADDING ->>> ", manifestId + ",", count, "fragments");
   let options = {};
   this.storage.params.setItem(manifestId, this._names.downloadInProgress, 0);
-  let maxDownloadInProgress;
+  let minDownloadInProgress, maxDownloadInProgress;
   const threadRules = appSettings.getSettings().downloadingThreadsRules;
-
-  for (let i = 0, j = threadRules.items.length; i < j; i++) {
-    if (count <= threadRules.items[i].max) {
-      options[threadRules.threadName] = threadRules.items[i].threads;
-      maxDownloadInProgress = threadRules.items[i].files;
-      break;
-    }
-  }
+  minDownloadInProgress = threadRules.files.start;
+  maxDownloadInProgress = threadRules.files.max;
 
   this.storage.params.setItem(manifestId, this._names.options, options);
+  this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloadInProgress);
   this.storage.params.setItem(manifestId, this._names.maxDownloadInProgress, maxDownloadInProgress);
+  this.storage.params.setItem(manifestId, this._names.maxSpeed, 0);
 
   //download order can help to stop download one manifest and download another or download them in parallel
   this._downloadOrderAddManifest(manifestId);
@@ -789,7 +788,7 @@ DownloadsController.prototype._addLinkToDownload = function (manifestId, link) {
  * @returns {void}
  */
 DownloadsController.prototype.startQueue = function (nextManifestPositionInArray, forceDownload) {
-  let count, downloadsInProgress, link, manifestId, maxDownloads;
+  let count, downloadsInProgress, link, manifestId, minDownloads, maxDownloads, maxSpeed;
   if (typeof nextManifestPositionInArray === "undefined") {
     nextManifestPositionInArray = 0;
   }
@@ -821,8 +820,25 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
     return;
   }
   downloadsInProgress = this.storage.params.getItem(manifestId, this._names.downloadInProgress);
+  minDownloads = this.storage.params.getItem(manifestId, this._names.minDownloadInProgress);
   maxDownloads = this.storage.params.getItem(manifestId, this._names.maxDownloadInProgress);
-  if ((downloadsInProgress < maxDownloads - 1) || forceDownload) {
+  maxSpeed = this.storage.params.getItem(manifestId, this._names.maxSpeed);
+  if (this.canIncreaseDownload && this.downloadStats && minDownloads < maxDownloads) {
+    let speed = this.downloadStats.getStats(manifestId).speed;
+    console.info('downloadsInProgress', downloadsInProgress, this.downloadStats._convertToBytes(speed), this.downloadStats._convertToBytes(maxSpeed));
+    if (speed > 0 && speed > maxSpeed) {
+      this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
+      minDownloads++
+      this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
+      console.info('increase download', minDownloads);
+      this.canIncreaseDownload = false;
+      setTimeout(() => {
+        // we let the opportunity to increase the number of pararell downloads every 5s
+        this.canIncreaseDownload = true;
+      }, 5000);
+    }
+  }
+  if ((downloadsInProgress < minDownloads) || forceDownload) {
     link = this.storage.left.shift(manifestId);
     if (link) {
       this.storage.params.increase(manifestId, this._names.downloadInProgress);
