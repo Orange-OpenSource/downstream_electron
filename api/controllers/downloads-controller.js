@@ -1,7 +1,7 @@
 /*eslint no-console: ["error", { allow: ["warn", "error", "info"] }] */
 "use strict";
 const _ = require("underscore");
-const mkdirp = require("mkdirp");
+const makeDir = require("make-dir");
 
 const appSettings = require("../app-settings");
 const translation = require("../translation/index");
@@ -237,7 +237,9 @@ DownloadsController.prototype._markDownloadItem = function (download) {
           self.startQueue();
         });
       } else {
-        self.startQueue();
+        setTimeout(function () {
+          self.startQueue();
+        }, 100); // delay a little each download
       }
     }, function (err) {
       console.error("ERROR", err);
@@ -533,7 +535,7 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
   Promise.all([
     this._offlineController.getManifestInfoPromise(manifestId, true),
     this.storage.getItem(manifestId),
-    mkdirp(localPath),
+    makeDir(localPath),
   ])
     .then(function (results) {
       const info = results[0];
@@ -825,12 +827,14 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
   maxSpeed = this.storage.params.getItem(manifestId, this._names.maxSpeed);
   if (this.canIncreaseDownload && this.downloadStats && minDownloads < maxDownloads) {
     let speed = this.downloadStats.getStats(manifestId).speed;
-    console.info('downloadsInProgress', downloadsInProgress, this.downloadStats._convertToBytes(speed), this.downloadStats._convertToBytes(maxSpeed));
+    if (speed > 0) {
+      console.info('downloadsInProgress', downloadsInProgress, this.downloadStats._convertToBytes(speed, 0, 2), this.downloadStats._convertToBytes(maxSpeed, 0, 2));
+    }
     if (speed > 0 && speed > maxSpeed) {
       this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
       minDownloads++
       this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
-      console.info('increase download', minDownloads);
+      console.info('increase download', minDownloads, 'max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
       this.canIncreaseDownload = false;
       setTimeout(() => {
         // we let the opportunity to increase the number of pararell downloads every 5s

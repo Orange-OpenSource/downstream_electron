@@ -1,5 +1,5 @@
 "use strict";
-const mkdirp = require('mkdirp');
+const makeDir = require('make-dir');
 
 const appSettings = require('../app-settings');
 const jsonfile = require('jsonfile');
@@ -30,7 +30,7 @@ FlushItem.prototype._saveToDisk = function (resolve, reject) {
   const path = appSettings.getSettings().settingsFolder + this.manifestId + "/";
   const file = "" + this.storageKey + ".json";
   const fileUrl = path + file;
-  mkdirp(path).then(function () {
+  makeDir(path).then(function () {
     let data = convertStorage(self.storageKey, self.items);
     jsonfile.writeFile(fileUrl, data, function (err) {
       if (!err) {

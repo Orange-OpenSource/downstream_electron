@@ -16,7 +16,7 @@ function DownloadStats (storage) {
   this._storage = storage;
   this._stats = {};
   this._statsPrevious = {};
-  this._STATS_TIME_GENERATION = 2000;
+  this._STATS_TIME_GENERATION = 1000;
   _.bindAll(this, "_generate");
 }
 

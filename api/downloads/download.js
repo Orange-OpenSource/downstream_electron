@@ -3,7 +3,7 @@ const _ = require("underscore");
 const domain = require('domain');
 const DownloadFileNoHead = require("./download-file-no-head");
 const DownloadFile = require("./download-file");
-const mkdirp = require("mkdirp");
+const makeDir = require("make-dir");
 
 const appSettings = require("../app-settings");
 const EventEmitter = require("events").EventEmitter;
@@ -63,7 +63,7 @@ Download.prototype._createLocalPath = function (callback) {
   let folders = this.localUrl.split("/");
   folders = folders.slice(0, folders.length - 1);
   folders = folders.join("/");
-  mkdirp(folders).then(function () {
+  makeDir(folders).then(function () {
     callback();
   }, function (error) {
     callback(error);
