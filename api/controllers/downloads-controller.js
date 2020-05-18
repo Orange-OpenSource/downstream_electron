@@ -38,9 +38,9 @@ function DownloadsController (manifestController, offlineController) {
     maxDownloadInProgress: "maxDownloadInProgress",
     maxSpeed: "maxSpeed"
   };
-  this._STATS_TIME_GENERATION = 1000;
   this.downloadStats = new DownloadStats(this.storage);
-  this.canIncreaseDownload = true;
+  this.thresholdIncrease = 1.1;
+  this.thresholdDecrease = 0.8;
   _.bindAll(this, "_onDownloadEnd", "_onDownloadError", "isDownloadFinished");
 }
 
@@ -59,9 +59,9 @@ DownloadsController.prototype._addDownloads = function (manifestId, videoLinks, 
   while (working) {
     let ratioAudioVideo = videoLinks.length ? Math.round(audioLinks.length / videoLinks.length) : 1;
     let ratioTextVideo = videoLinks.length ? Math.round(textLinks.length / videoLinks.length) : 1;
-    this._addNextItemToQueue(manifestId, textLinks, ratioTextVideo);
-    this._addNextItemToQueue(manifestId, audioLinks, ratioAudioVideo);
     this._addNextItemToQueue(manifestId, videoLinks);
+    this._addNextItemToQueue(manifestId, audioLinks, ratioAudioVideo);
+    this._addNextItemToQueue(manifestId, textLinks, ratioTextVideo);
     working = !!(textLinks.length || videoLinks.length || audioLinks.length);
   }
 };
@@ -237,9 +237,7 @@ DownloadsController.prototype._markDownloadItem = function (download) {
           self.startQueue();
         });
       } else {
-        setTimeout(function () {
-          self.startQueue();
-        }, 500); // delay a little each download
+        self.startQueue();
       }
     }, function (err) {
       console.error("ERROR", err);
@@ -339,10 +337,12 @@ DownloadsController.prototype._prepareStartOptions = function (manifestId, video
   console.info("ADDING ->>> ", manifestId + ",", count, "fragments");
   let options = {};
   this.storage.params.setItem(manifestId, this._names.downloadInProgress, 0);
-  let minDownloadInProgress, maxDownloadInProgress;
+
   const threadRules = appSettings.getSettings().downloadingThreadsRules;
-  minDownloadInProgress = threadRules.files.start;
-  maxDownloadInProgress = threadRules.files.max;
+  let minDownloadInProgress = threadRules.files.start;
+  let maxDownloadInProgress = threadRules.files.max;
+  this.thresholdIncrease = threadRules.files.thresholdIncrease;
+  this.thresholdDecrease = threadRules.files.thresholdDecrease;
 
   this.storage.params.setItem(manifestId, this._names.options, options);
   this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloadInProgress);
@@ -826,25 +826,24 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
   maxDownloads = this.storage.params.getItem(manifestId, this._names.maxDownloadInProgress);
   maxSpeed = this.storage.params.getItem(manifestId, this._names.maxSpeed);
   let changeNbDownload = false;
-  if (this.canIncreaseDownload && this.downloadStats) {
+  if (this.downloadStats) {
     let speed = this.downloadStats.getStats(manifestId).speed;
-    if (minDownloads < maxDownloads && speed > 0 && speed > maxSpeed * 1.1) {
-      changeNbDownload = true;
-      minDownloads++;
-      console.info('DownloadsController::increase downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'previous max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
-    } else if (minDownloads > 6 && minDownloads && speed < maxSpeed * 0.8) {
-      changeNbDownload = true;
-      minDownloads--;
-      console.info('DownloadsController::decrease downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'max speed:', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
-    }
-    if (changeNbDownload) {
-      this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
+    if (maxSpeed === 0) {
       this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
-      this.canIncreaseDownload = false;
-      setTimeout(() => {
-        // we let the opportunity to increase the number of pararell downloads every 5s
-        this.canIncreaseDownload = true;
-      }, 5000);
+    } else {
+      if (minDownloads < maxDownloads && speed > 0 && speed > maxSpeed * this.thresholdIncrease) {
+        changeNbDownload = true;
+        minDownloads++;
+        console.info('DownloadsController::increase downloads', minDownloads, 'speed:', this.downloadStats.getStats(manifestId).speedBytes, 'previous max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
+      } else if (minDownloads > 6 && minDownloads && speed < maxSpeed * this.thresholdDecrease) {
+        changeNbDownload = true;
+        minDownloads--;
+        console.info('DownloadsController::decrease downloads', minDownloads, 'speed:', this.downloadStats.getStats(manifestId).speedBytes, 'max speed:', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
+      }
+      if (changeNbDownload) {
+        this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
+        this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
+      }
     }
   }
   if ((downloadsInProgress < minDownloads) || forceDownload) {

@@ -66,7 +66,9 @@ let settings = {
   downloadingThreadsRules: {
     files: {
       start: 6,
-      max: 30
+      max: 50,
+      thresholdIncrease: 1.1,
+      thresholdDecrease: 0.8
     },
     threads: [
       {size: 10, number: 1},
@@ -102,7 +104,7 @@ let settings = {
     RETRY_TIMEOUT: 5000
   },
   useChunkedEncoding: false,
-  useHeadRequests: true,
+  useHeadRequests: false,
   noCache: false,
   defaultManifestRequestOptions: {
     headers: {
@@ -186,6 +188,9 @@ function loadUserSettings (jsonSettings) {
     }
     if (jsonSettings.noCache) {
       settings.noCache = jsonSettings.noCache
+    }
+    if (jsonSettings.downloadingThreadsRules && jsonSettings.downloadingThreadsRules.files) {
+      settings.downloadingThreadsRules = jsonSettings.downloadingThreadsRules
     }
   }
 
