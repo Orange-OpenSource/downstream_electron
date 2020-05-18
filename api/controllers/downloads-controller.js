@@ -825,16 +825,21 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
   minDownloads = this.storage.params.getItem(manifestId, this._names.minDownloadInProgress);
   maxDownloads = this.storage.params.getItem(manifestId, this._names.maxDownloadInProgress);
   maxSpeed = this.storage.params.getItem(manifestId, this._names.maxSpeed);
-  if (this.canIncreaseDownload && this.downloadStats && minDownloads < maxDownloads) {
+  let changeNbDownload = false;
+  if (this.canIncreaseDownload && this.downloadStats) {
     let speed = this.downloadStats.getStats(manifestId).speed;
-    if (speed > 0) {
-      console.info('downloadsInProgress', downloadsInProgress, this.downloadStats._convertToBytes(speed, 0, 2), this.downloadStats._convertToBytes(maxSpeed, 0, 2));
-    }
-    if (speed > 0 && speed > maxSpeed) {
+    if (minDownloads < maxDownloads && speed > 0 && speed > maxSpeed * 1.05) {
+      changeNbDownload = true;
       this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
-      minDownloads++
+      minDownloads++;
+      console.info('DownloadsController::increase downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'previous max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
+    } else if (minDownloads > 6 && minDownloads && speed < maxSpeed * 0.9) {
+      changeNbDownload = true;
+      minDownloads--;
+      console.info('DownloadsController::decrease downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'max speed:', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
+    }
+    if (changeNbDownload) {
       this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
-      console.info('increase download', minDownloads, 'max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
       this.canIncreaseDownload = false;
       setTimeout(() => {
         // we let the opportunity to increase the number of pararell downloads every 5s
