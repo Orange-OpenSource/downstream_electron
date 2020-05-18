@@ -239,7 +239,7 @@ DownloadsController.prototype._markDownloadItem = function (download) {
       } else {
         setTimeout(function () {
           self.startQueue();
-        }, 100); // delay a little each download
+        }, 500); // delay a little each download
       }
     }, function (err) {
       console.error("ERROR", err);
@@ -828,18 +828,18 @@ DownloadsController.prototype.startQueue = function (nextManifestPositionInArray
   let changeNbDownload = false;
   if (this.canIncreaseDownload && this.downloadStats) {
     let speed = this.downloadStats.getStats(manifestId).speed;
-    if (minDownloads < maxDownloads && speed > 0 && speed > maxSpeed * 1.05) {
+    if (minDownloads < maxDownloads && speed > 0 && speed > maxSpeed * 1.1) {
       changeNbDownload = true;
-      this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
       minDownloads++;
       console.info('DownloadsController::increase downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'previous max speed', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
-    } else if (minDownloads > 6 && minDownloads && speed < maxSpeed * 0.9) {
+    } else if (minDownloads > 6 && minDownloads && speed < maxSpeed * 0.8) {
       changeNbDownload = true;
       minDownloads--;
       console.info('DownloadsController::decrease downloads', minDownloads, 'speed:', this.downloadStats._convertToBytes(speed, 0, 2), 'max speed:', this.downloadStats._convertToBytes(maxSpeed, 0, 2));
     }
     if (changeNbDownload) {
       this.storage.params.setItem(manifestId, this._names.minDownloadInProgress, minDownloads);
+      this.storage.params.setItem(manifestId, this._names.maxSpeed, speed);
       this.canIncreaseDownload = false;
       setTimeout(() => {
         // we let the opportunity to increase the number of pararell downloads every 5s

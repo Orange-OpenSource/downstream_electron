@@ -207,7 +207,9 @@ DownloadStats.prototype._generate = function (refresh) {
     allStats[manifestId].writeProgress = allStats[manifestId].writeProgressDownloading + allStats[manifestId].writeProgressDownloaded;
 
     let speed = this._getDiff("downloadingBytes", manifestId, allStats, this._statsPrevious);
-    speed += this._getDiff("downloadedBytes", manifestId, allStats, this._statsPrevious);
+    if (this._statsPrevious[manifestId] && this._statsPrevious[manifestId].downloadedBytes && this._statsPrevious[manifestId].downloadedBytes > 0) {
+      speed += this._getDiff("downloadedBytes", manifestId, allStats, this._statsPrevious);
+    }
     speed = (speed * 1000) / ((now - this._statsTime) || 1  );
     allStats[manifestId].speed = speed;
     allStats[manifestId].status = this._storage.status.getItem(manifestId, "status");

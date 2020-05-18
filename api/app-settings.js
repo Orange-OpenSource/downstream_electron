@@ -65,8 +65,8 @@ const path = require("path");
 let settings = {
   downloadingThreadsRules: {
     files: {
-      start: 4,
-      max: 20
+      start: 6,
+      max: 30
     },
     threads: [
       {size: 10, number: 1},
