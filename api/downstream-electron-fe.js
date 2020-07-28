@@ -4,6 +4,7 @@ const WIDEVINE_SCHEME_ID_URI = 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed';
 
 const remote = require('electron').remote;
 const ipcRenderer = require('electron').ipcRenderer;
+const serialize = require('serialize-javascript');
 
 const translation = require("./translation/index");
 
@@ -247,7 +248,7 @@ DownstreamElectronFE.prototype._apiCall = function (method, args, originalMethod
   request.promiseId = promiseId;
   request.method = method;
   request.windowId = this._windowId;
-  request.args = args;
+  request.args = serialize(args);
   this._send(request);
   return promise;
 };
