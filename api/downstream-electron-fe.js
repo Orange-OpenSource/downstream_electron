@@ -4,11 +4,14 @@ const WIDEVINE_SCHEME_ID_URI = 'urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed';
 
 const remote = require('electron').remote;
 const ipcRenderer = require('electron').ipcRenderer;
-const serialize = require('serialize-javascript');
 
 const translation = require("./translation/index");
 
 let downstreamElectronFE;
+
+function serialize (obj) {
+  return JSON.stringify(obj);
+}
 
 function getWidevinePSSH (info) {
   const manifestProtections = info.manifestInfo.protections;

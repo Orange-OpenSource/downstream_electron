@@ -13,8 +13,12 @@ const Server = require('./server/server.js');
 
 let DownstreamElectronBE;
 
-function deserialize(serializedJavascript){
-  return eval('(' + serializedJavascript + ')');
+function deserialize (serializedJavascript) {
+  try {
+    return JSON.parse(serializedJavascript);
+  } catch (err) {
+    return {};
+  }
 }
 
 /**
