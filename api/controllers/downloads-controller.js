@@ -642,7 +642,7 @@ DownloadsController.prototype.start = function (manifestId, representations, dow
                         }, onFailure);
                   }, onFailure);
             }, onFailure);
-      });
+      }, onFailure);
 };
 
 /**

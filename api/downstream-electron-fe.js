@@ -389,7 +389,7 @@ DownstreamElectronFE.prototype._removeSubscribers = function () {
     }
   }
   request.method = 'removeSubscribers';
-  request.args = [subscribersId];
+  request.args = serialize([subscribersId]);
 
   this._send(request);
 };
