@@ -1,5 +1,5 @@
 /*!
- * downstream-electron,0.4.0-o.1,2021-02-23 17:35:15.301,castlabs GmbH
+ * downstream-electron,0.4.0-o.2,2021-03-12 17:01:52.569,castlabs GmbH
  * 
  * Copyright (C) 2017 Castlabs GmbH.
  * Licensed under the Apache License, Version 2.0 (the "License");
