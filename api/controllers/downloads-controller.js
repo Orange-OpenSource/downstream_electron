@@ -299,13 +299,14 @@ DownloadsController.prototype._stopWithStatus = function (manifestId, onSuccess,
 DownloadsController.prototype._onDownloadError = function (download, err) {
   console.error("ERROR", download.remoteUrl, err);
   this._markDownloadItem(download);
-  if (err === downloadFileUtil.errors.NO_SPACE_LEFT_ERROR || appSettings.getSettings().stopOnError) {
-    // stop downloading => cannot write
+  if (err === downloadFileUtil.errors.NO_SPACE_LEFT_ERROR || err === downloadFileUtil.errors.ERR_NETWORK_IO_SUSPENDED || appSettings.getSettings().stopOnError) {
+    // stop downloading => cannot write or network suspended
+    let status = (err === downloadFileUtil.errors.ERR_NETWORK_IO_SUSPENDED) ? STATUSES.STOPPED : STATUSES.ERROR;
     this._stopWithStatus(download.manifestId, () => {
-      console.info('stopped');
+      console.error('stopped', status);
     }, (failure) => {
       console.info(failure);
-    }, STATUSES.ERROR, err);
+    }, status, err);
   }
 };
 
